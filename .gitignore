@@ -1,0 +1,15 @@
+# Python
+__pycache__/
+*.pyc
+
+# Django
+db.sqlite3
+
+# Virtual env
+.venv/
+
+# PyCharm
+.idea/
+
+# Mac
+.DS_Store
