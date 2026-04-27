@@ -1,15 +1,11 @@
 from django.db import models
 from django.conf import settings
+from audit_app.choices import MessageCategory
+from .choices import UploadStatus
 
 # Message model that stores one organisational communication record
 # Imported from a Slack-like dataset
 class Message(models.Model):
-    # Ground truth labels from the dataset — never used by the detector
-    # Used for synthetic evaluation datasets
-    CATEGORY_CHOICES = [
-        ("normal", "Normal"),
-        ("risk_indicator", "Risk Indicator"),
-    ]
 
     # Unique identifier extracted from uploaded dataset
     # Prevents duplicate imports of the same message
@@ -25,6 +21,7 @@ class Message(models.Model):
     # Indexed to improve filtering and retrieval by sender
     sender_id = models.CharField(max_length=50, db_index=True)
 
+    # Readable, sender name
     sender_name = models.CharField(max_length=100)
 
     # Job title / organisational role of sender
@@ -37,7 +34,7 @@ class Message(models.Model):
     # Used only for evaluation, never used by the detection engine
     category = models.CharField(
         max_length=20,
-        choices=CATEGORY_CHOICES,
+        choices=MessageCategory.choices,
         blank=True,
         null=True,
         db_index=True
@@ -83,5 +80,18 @@ class UploadBatch(models.Model):
     # Number of records processed during the upload
     total_records = models.PositiveIntegerField(default=0)
 
+    status = models.CharField(
+        max_length=20,
+        choices=UploadStatus.choices,
+        default=UploadStatus.PENDING,
+    )
+
+    failed_records = models.PositiveIntegerField(default=0)
+
+    error_log = models.TextField(blank=True, null=True)
+
+
+    class Meta:
+        ordering = ['-uploaded_at']
     def __str__(self):
         return f"{self.filename} ({self.uploaded_at:%Y-%m-%d %H:%M})"
