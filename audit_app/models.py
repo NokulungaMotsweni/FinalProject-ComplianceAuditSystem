@@ -15,11 +15,11 @@ class AuditResult(models.Model):
     def save(self, *args, **kwargs):
         score = self.risk_score or 0
 
-        if self.risk_score >= 80:
+        if score >= 80:
             self.risk_level = RiskLevel.CRITICAL
-        elif self.risk_score >= 60:
+        elif score >= 60:
             self.risk_level = RiskLevel.HIGH
-        elif self.risk_score >= 30:
+        elif score >= 30:
             self.risk_level = RiskLevel.MEDIUM
         else:
             self.risk_level = RiskLevel.LOW
