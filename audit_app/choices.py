@@ -14,13 +14,6 @@ class ReviewStatus(models.TextChoices):
     REVIEWED = "reviewed", "Reviewed"
     DISMISSED = "dismissed", "Dismissed"
 
-
-# Ground-truth labels used only for testing / evaluation datasets
-class MessageCategory(models.TextChoices):
-    NORMAL = "normal", "Normal"
-    RISK_INDICATOR = "risk_indicator", "Risk Indicator"
-
-
 # Optional severity band for prioritisation
 class RiskLevel(models.TextChoices):
     LOW = "low", "Low"
