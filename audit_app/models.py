@@ -12,7 +12,7 @@ class AuditResult(models.Model):
         related_name='audit_results',
     )
 
-    def save(self, *args, **kwargs):
+    def apply_risk_logic(self):
         score = self.risk_score or 0
 
         if score >= 80:
@@ -26,6 +26,9 @@ class AuditResult(models.Model):
 
         self.flagged = score >= 30
 
+
+    def save(self, *args, **kwargs):
+        self.apply_risk_logic()
         super().save(*args, **kwargs)
 
     flagged = models.BooleanField(default=False, db_index=True)
@@ -85,7 +88,7 @@ class AuditResult(models.Model):
         constraints = [
             models.UniqueConstraint(
                 fields=["message", "method"],
-                name="unique_audit_message_result"
+                name="unique_message_method_result"
             )
         ]
 

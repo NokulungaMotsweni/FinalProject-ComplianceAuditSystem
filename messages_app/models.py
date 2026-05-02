@@ -1,7 +1,6 @@
 from django.db import models
 from django.conf import settings
-from audit_app.choices import MessageCategory
-from .choices import UploadStatus
+from .choices import UploadStatus, MessageCategory
 
 # Message model that stores one organisational communication record
 # Imported from a Slack-like dataset
