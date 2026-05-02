@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+
+{% block title %}Results{% endblock %}
+
+{% block content %}
+
+<h1 class="mb-4 fw-bold">Audit Results</h1>
+
+<div class="card dashboard-card p-4">
+
+<a href="/results/run_audit/" class="btn btn-primary mb-3">
+    Run Audit
+</a>
+
+<table class="table table-hover align-middle">
+
+    <thead>
+        <tr>
+            <th>Sender</th>
+            <th>Channel</th>
+            <th>Risk Score</th>
+            <th>Level</th>
+            <th>Method</th>
+        </tr>
+    </thead>
+
+    <tbody>
+
+    {% for result in results %}
+        <tr>
+            <td>{{ result.message.sender_name }}</td>
+            <td>#{{ result.message.channel }}</td>
+            <td>{{ result.risk_score }}</td>
+
+            <td>
+                {% if result.risk_level == "critical" %}
+                <span class="badge bg-danger">Critical</span>
+                {% elif result.risk_level == "high" %}
+                    <span class="badge bg-warning text-dark">High</span>
+                {% elif result.risk_level == "medium" %}
+                    <span class="badge bg-info text-dark">Medium</span>
+                {% else %}
+                    <span class="badge bg-secondary">Low</span>
+                {% endif %}....
+            </td>
+
+            <td>{{ result.method }}</td>
+        </tr>
+    {% empty %}
+        <tr>
+            <td colspan="5">No audit results yet.</td>
+        </tr>
+    {% endfor %}
+
+    </tbody>
+
+</table>
+
+</div>
+
+{% endblock %}

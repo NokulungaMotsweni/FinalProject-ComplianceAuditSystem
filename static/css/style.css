@@ -1,0 +1,26 @@
+body {
+    background-color: #f8f9fa;
+}
+
+.dashboard-card {
+    border: none;
+    border-radius: 14px;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.06);
+}
+
+h1, h2 {
+    font-weight: 700;
+}
+
+.navbar-brand {
+    letter-spacing: 0.5px;
+}
+
+.table td, .table th {
+    vertical-align: middle;
+}
+
+.badge {
+    font-size: 0.8rem;
+    padding: 6px 10px;
+}
