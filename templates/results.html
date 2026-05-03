@@ -30,7 +30,7 @@
         <tr>
             <td>{{ result.message.sender_name }}</td>
             <td>#{{ result.message.channel }}</td>
-            <td>{{ result.risk_score }}</td>
+            <td>{{ result.risk_score|floatformat:2 }}</td>
 
             <td>
                 {% if result.risk_level == "critical" %}

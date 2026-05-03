@@ -4,7 +4,7 @@ from django.db import models
 # Detection methods used by the compliance engine
 class DetectionMethod(models.TextChoices):
     RULE_BASED = "rule_based", "Rule Based"
-    TFIDF = "tfidf", "TF-IDF"
+    TF_IDF = "tfidf", "TF-IDF"
     HYBRID = "hybrid", "Hybrid"
 
 
