@@ -5,7 +5,9 @@ from audit_app.choices import DetectionMethod
 from audit_app.services.rule_engine import RuleBasedDetector
 from .services.tfidf_service import TFIDFDetector
 from audit_app.services.hybrid import hybrid_score
+from django.db.models import Count
 import time
+
 
 
 def run_audit(request):
@@ -106,4 +108,21 @@ def results_list(request):
                filter(flagged=True).
                order_by("-created_at"))
 
-    return render(request, "results.html", {"results": results})
+    top_senders = (
+        AuditResult.objects.select_related("message")
+        .filter(flagged=True)
+        .values("message__sender_name")
+        .annotate(flag_count=Count("id"))
+        .order_by("-flag_count")[:5]
+    )
+
+    context = {
+        "results": results,
+        "total_results": results.count(),
+        "medium_count": results.filter(risk_level="medium").count(),
+        "critical_count": results.filter(risk_level="critical").count(),
+        "high_count": results.filter(risk_level="high").count(),
+        "top_senders": top_senders,
+    }
+
+    return render(request, "results.html", context)
