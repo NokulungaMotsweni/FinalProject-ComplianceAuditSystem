@@ -4,7 +4,7 @@ from .models import AuditResult
 from audit_app.choices import DetectionMethod
 from audit_app.services.rule_engine import RuleBasedDetector
 from .services.tfidf_service import TFIDFDetector
-import numpy as np
+from audit_app.services.hybrid import hybrid_score
 import time
 
 
@@ -13,11 +13,15 @@ def run_audit(request):
 
     messages = list(Message.objects.all())
 
+    rule_results = {}
+
     # -----------------
     # RULE-BASED
     # -----------------
     for message in messages:
         score, reason = RuleBasedDetector.analyse(message.message_text)
+
+        rule_results[message.id] = (score, reason)
 
         obj, _ = AuditResult.objects.get_or_create(
             message=message,
@@ -35,6 +39,7 @@ def run_audit(request):
     # ---------------
     tfidf_scores = TFIDFDetector.analyse(messages)
 
+    tfidf_results = {}
 
 
     for message, score in zip(messages, tfidf_scores):
@@ -42,8 +47,9 @@ def run_audit(request):
         # scale score
         scaled_score = round(float(score * 100), 2)
 
-        reason = ""
+        tfidf_results[message.id] = scaled_score
 
+        reason = ""
         if scaled_score >= 60:
            reason = "High TF-IDF anomaly score"
         elif scaled_score >= 30:
@@ -55,6 +61,35 @@ def run_audit(request):
         )
 
         obj.risk_score = scaled_score
+        obj.reason = reason
+        obj.apply_risk_logic()
+        obj.save()
+
+
+    # -----------------
+    # HYBRID
+    # -----------------
+    for message, tfidf_raw in zip(messages, tfidf_scores):
+
+        rule_score, rule_reason = rule_results.get(message.id, (0, ""))
+
+        tfidf_score = tfidf_results.get(message.id, 0)
+
+        hybrid = hybrid_score(rule_score, tfidf_score)
+
+        if rule_score > 0:
+            reason = rule_reason
+        elif tfidf_score >= 30:
+            reason = "TF-IDF anomaly signal"
+        else:
+            reason = ""
+
+        obj, _ = AuditResult.objects.get_or_create(
+            message=message,
+            method=DetectionMethod.HYBRID,
+        )
+
+        obj.risk_score = hybrid
         obj.reason = reason
         obj.apply_risk_logic()
         obj.save()
