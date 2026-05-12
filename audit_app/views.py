@@ -1,11 +1,13 @@
 from django.shortcuts import render, redirect
 from messages_app.models import Message
+from .evaluate import run_full_evaluation
 from .models import AuditResult
 from audit_app.choices import DetectionMethod
 from audit_app.services.rule_engine import RuleBasedDetector
 from .services.tfidf_service import TFIDFDetector
 from audit_app.services.hybrid import hybrid_score
-from django.db.models import Count
+from django.db.models import Count, Case, When, IntegerField
+from django.utils import timezone
 import time
 
 
@@ -126,3 +128,76 @@ def results_list(request):
     }
 
     return render(request, "results.html", context)
+
+def review_queue(request):
+    # Get all flagged results, preferring hybrid where it exists
+    all_flagged = (
+        AuditResult.objects
+        .filter(flagged=True)
+        .select_related("message")
+        .annotate(
+            method_priority=Case(
+                When(method=DetectionMethod.HYBRID, then=0),
+                default=1,
+                output_field=IntegerField()
+            )
+        )
+        .order_by("message_id", "method_priority", "-risk_score")
+    )
+
+    # Deduplicate by message — keep one result per message
+    seen = set()
+    queue = []
+    for result in all_flagged:
+        if result.message_id not in seen:
+            seen.add(result.message_id)
+            queue.append(result)
+
+    # Sort final queue by risk score
+    queue.sort(key=lambda r: r.risk_score, reverse=True)
+
+    selected = None
+    all_method_results = []
+
+    selected_id = request.GET.get("selected")
+    if selected_id:
+        selected = AuditResult.objects.filter(
+            id=selected_id
+        ).select_related("message").first()
+
+        if selected:
+            all_method_results = (
+                AuditResult.objects
+                .filter(message=selected.message)
+                .order_by("method")
+            )
+
+    context = {
+        "queue": queue,
+        "selected": selected,
+        "all_method_results": all_method_results,
+    }
+    return render(request, "review_queue.html", context)
+
+
+def review_action(request, result_id):
+    if request.method == "POST":
+        result = AuditResult.objects.get(id=result_id)
+        decision = request.POST.get("decision")
+        notes = request.POST.get("notes", "")
+
+        result.review_status = decision
+        result.review_notes = notes
+        result.reviewed_by = request.user
+        result.reviewed_at = timezone.now()
+
+        if request.user.is_authenticated:
+            result.reviewed_by = request.user
+
+        result.save()
+
+    return redirect(f"/review/?selected={result_id}")
+
+def evaluation_view(request):
+    results = run_full_evaluation()
+    return render(request, "evaluation.html", {"results": results})

@@ -18,9 +18,13 @@ from xml.etree.ElementInclude import include
 
 from django.contrib import admin
 from django.urls import path, include
+from audit_app import views as audit_views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('messages_app.urls')),
-    path('results/', include('audit_app.urls'))
+    path('results/', include('audit_app.urls')),
+    path('review/', audit_views.review_queue, name='review_queue'),
+    path('review/<int:result_id>/action/', audit_views.review_action, name='review_action'),
+    path('evaluation/', audit_views.evaluation_view, name='evaluation'),
 ]

@@ -1,0 +1,136 @@
+{% extends 'base.html' %}
+
+{% block title %}Review Queue{% endblock %}
+
+{% block content %}
+<div class="review-layout">
+
+    <!-- LEFT PANEL -->
+    <div class="review-list">
+        <div class="review-list-header">
+            <h2 class="page-title">Review Queue</h2>
+            <span class="queue-count">{{ queue|length }} flagged</span>
+        </div>
+
+        <div class="review-list-scroll">
+            {% for result in queue %}
+            <a href="/review/?selected={{ result.id }}"
+               class="review-item {% if selected and selected.message.id == result.message.id %}review-item-active{% endif %}">
+                <div class="review-item-top">
+                    <span class="fw-600">{{ result.message.sender_name }}</span>
+                    {% if result.risk_level == "critical" %}
+                        <span class="risk-badge risk-critical">Critical</span>
+                    {% elif result.risk_level == "high" %}
+                        <span class="risk-badge risk-high">High</span>
+                    {% elif result.risk_level == "medium" %}
+                        <span class="risk-badge risk-medium">Medium</span>
+                    {% endif %}
+                </div>
+                <div class="review-item-bottom">
+                    <span class="text-muted">{{ result.message.channel }}</span>
+                    {% if result.review_status == "pending" %}
+                        <span class="status-badge status-pending">Pending</span>
+                    {% elif result.review_status == "reviewed" %}
+                        <span class="status-badge status-reviewed">Reviewed</span>
+                    {% elif result.review_status == "dismissed" %}
+                        <span class="status-badge status-dismissed">Dismissed</span>
+                    {% endif %}
+                </div>
+            </a>
+            {% empty %}
+                <p class="text-muted p-3">No flagged messages in queue.</p>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- RIGHT PANEL -->
+    <div class="review-detail">
+        {% if selected %}
+
+            <!-- Message Info -->
+            <div class="detail-header">
+                <div>
+                    <h3 class="fw-600">{{ selected.message.sender_name }}</h3>
+                    <span class="text-muted">{{ selected.message.channel }} · {{ selected.message.timestamp }}</span>
+                </div>
+                {% if selected.risk_level == "critical" %}
+                    <span class="risk-badge risk-critical">Critical</span>
+                {% elif selected.risk_level == "high" %}
+                    <span class="risk-badge risk-high">High</span>
+                {% elif selected.risk_level == "medium" %}
+                    <span class="risk-badge risk-medium">Medium</span>
+                {% endif %}
+            </div>
+
+            <!-- Message Text -->
+            <div class="message-box">
+                {{ selected.message.message_text }}
+            </div>
+
+            <!-- Method Breakdown -->
+            <div class="method-breakdown">
+                <p class="panel-title">Detection Breakdown</p>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Method</th>
+                            <th>Score</th>
+                            <th>Reason</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {% for result in all_method_results %}
+                        <tr>
+                            <td>{{ result.get_method_display }}</td>
+                            <td class="fw-600">{{ result.risk_score|floatformat:2 }}</td>
+                            <td class="text-muted">{{ result.reason|default:"—" }}</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Review Action -->
+            {% if selected.review_status == "pending" %}
+            <div class="review-actions">
+                <form method="POST" action="/review/{{ selected.id }}/action/">
+                    {% csrf_token %}
+                    <textarea
+                        name="notes"
+                        class="review-notes"
+                        placeholder="Add review notes (optional)..."></textarea>
+                    <div class="action-buttons">
+                        <button type="submit" name="decision"
+                                value="reviewed" class="btn btn-confirm">
+                            Confirm Risk
+                        </button>
+                        <button type="submit" name="decision"
+                                value="dismissed" class="btn btn-dismiss">
+                            Dismiss
+                        </button>
+                    </div>
+                </form>
+            </div>
+            {% else %}
+            <div class="review-complete">
+                <p>
+                    Marked as <strong>{{ selected.get_review_status_display }}</strong>
+                    {% if selected.reviewed_at %}
+                        on {{ selected.reviewed_at|date:"d M Y H:i" }}
+                    {% endif %}
+                </p>
+                {% if selected.review_notes %}
+                    <p class="text-muted">Notes: {{ selected.review_notes }}</p>
+                {% endif %}
+            </div>
+            {% endif %}
+
+        {% else %}
+            <div class="detail-empty">
+                <p class="text-muted">Select a message from the queue to review it.</p>
+            </div>
+        {% endif %}
+    </div>
+
+</div>
+{% endblock %}
