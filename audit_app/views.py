@@ -1,7 +1,7 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from messages_app.models import Message
 from .evaluate import run_full_evaluation
-from .models import AuditResult
+from .models import AuditResult, AuditSession
 from audit_app.choices import DetectionMethod
 from audit_app.services.rule_engine import RuleBasedDetector
 from .services.tfidf_service import TFIDFDetector
@@ -11,11 +11,35 @@ from django.utils import timezone
 import time
 
 
+def select_batch(request):
+    from messages_app.models import UploadBatch
+    from messages_app.choices import UploadStatus
+
+    batches = UploadBatch.objects.filter(
+        status=UploadStatus.COMPLETE
+    ).order_by("-uploaded_at")
+
+    return render(request, "select_batch.html", {"batches": batches})
 
 def run_audit(request):
     start_time = time.time()
 
-    messages = list(Message.objects.all())
+    batch = None
+    # Get batch_id from POST — if none, fall back to all messages
+    batch_id = request.POST.get("batch_id")
+
+    if batch_id:
+        messages = list(Message.objects.filter(batch_id=batch_id))
+        # Clear existing audit results for this batch's messages only
+        AuditResult.objects.filter(message__in=messages)
+    else:
+        messages = list(Message.objects.all())
+
+    # Create a new session for this run
+    session = AuditSession.objects.create(
+        batch=batch,
+        created_by=request.user if request.user.is_authenticated else None
+    )
 
     rule_results = {}
 
@@ -27,16 +51,13 @@ def run_audit(request):
 
         rule_results[message.id] = (score, reason)
 
-        obj, _ = AuditResult.objects.get_or_create(
+        AuditResult.objects.create(
             message=message,
             method=DetectionMethod.RULE_BASED,
+            session=session,
+            risk_score=score,
+            reason=reason,
         )
-
-        obj.risk_score = score
-        obj.apply_risk_logic()
-        obj.reason = reason
-        obj.save()
-
 
     # ---------------
     # TF-IDF
@@ -59,15 +80,13 @@ def run_audit(request):
         elif scaled_score >= 30:
            reason = "Moderate TF-IDF anomaly score"
 
-        obj, _ = AuditResult.objects.get_or_create(
+        AuditResult.objects.create(
             message=message,
             method=DetectionMethod.TF_IDF,
+            session=session,
+            risk_score=scaled_score,
+            reason=reason,
         )
-
-        obj.risk_score = scaled_score
-        obj.reason = reason
-        obj.apply_risk_logic()
-        obj.save()
 
 
     # -----------------
@@ -88,15 +107,13 @@ def run_audit(request):
         else:
             reason = ""
 
-        obj, _ = AuditResult.objects.get_or_create(
+        AuditResult.objects.create(
             message=message,
             method=DetectionMethod.HYBRID,
+            session=session,
+            risk_score=hybrid,
+            reason=reason,
         )
-
-        obj.risk_score = hybrid
-        obj.reason = reason
-        obj.apply_risk_logic()
-        obj.save()
 
     end_time = time.time()
     duration = end_time - start_time
@@ -106,20 +123,40 @@ def run_audit(request):
     return redirect("results")
 
 def results_list(request):
-    results = (AuditResult.objects.select_related("message").
-               filter(flagged=True).
-               order_by("-created_at"))
+    # Get all sessions for the sidebar
+    sessions = AuditSession.objects.all().order_by("-created_at")
 
-    top_senders = (
-        AuditResult.objects.select_related("message")
-        .filter(flagged=True)
-        .values("message__sender_name")
-        .annotate(flag_count=Count("id"))
-        .order_by("-flag_count")[:5]
-    )
+    # Get selected session — default to latest
+    session_id = request.GET.get("session")
+    if session_id:
+        session = get_object_or_404(AuditSession, id=session_id)
+    else:
+        session = sessions.first()
+
+    if session:
+        results = (
+            AuditResult.objects
+            .select_related("message")
+            .filter(flagged=True, session=session)
+            .order_by("-created_at")
+        )
+
+        top_senders = (
+            AuditResult.objects
+            .select_related("message")
+            .filter(flagged=True, session=session)
+            .values("message__sender_name")
+            .annotate(flag_count=Count("id"))
+            .order_by("-flag_count")[:5]
+        )
+    else:
+        results = AuditResult.objects.none()
+        top_senders = []
 
     context = {
         "results": results,
+        "sessions": sessions,
+        "current_session": session,
         "total_results": results.count(),
         "medium_count": results.filter(risk_level="medium").count(),
         "critical_count": results.filter(risk_level="critical").count(),
@@ -130,6 +167,17 @@ def results_list(request):
     return render(request, "results.html", context)
 
 def review_queue(request):
+    # Get session filter
+    session_id = request.GET.get("session")
+    show = request.GET.get("show", "pending")
+
+    sessions = AuditSession.objects.all().order_by("-created_at")
+
+    if session_id:
+        session = get_object_or_404(AuditSession, id=session_id)
+    else:
+        session = sessions.first()
+
     # Get all flagged results, preferring hybrid where it exists
     all_flagged = (
         AuditResult.objects
@@ -144,6 +192,12 @@ def review_queue(request):
         )
         .order_by("message_id", "method_priority", "-risk_score")
     )
+
+    # Apply pending/reviewed filter
+    if show == "reviewed":
+        all_flagged = all_flagged.exclude(review_status="pending")
+    else:
+        all_flagged = all_flagged.filter(review_status="pending")
 
     # Deduplicate by message — keep one result per message
     seen = set()
@@ -176,6 +230,9 @@ def review_queue(request):
         "queue": queue,
         "selected": selected,
         "all_method_results": all_method_results,
+        "sessions": sessions,
+        "current_session": session,
+        "show": show,
     }
     return render(request, "review_queue.html", context)
 

@@ -8,7 +8,22 @@
     <div class="sticky-top-section">
         <div class="page-header mb-4">
             <h1 class="page-title">Audit Results</h1>
-            <a href="/results/run_audit/" class="btn btn-run">Run Audit</a>
+            <div class="d-flex gap-2 align-items-center">
+                <!-- Session selector -->
+                {% if sessions %}
+                <select class="form-select form-select-sm w-auto"
+                        onchange="window.location='/results/?session=' + this.value">
+                    {% for s in sessions %}
+                    <option value="{{ s.id }}"
+                        {% if current_session.id == s.id %}selected{% endif %}>
+                        {{ s.created_at|date:"d M Y H:i" }}
+                        {% if s.batch %} — {{ s.batch.filename }}{% endif %}
+                    </option>
+                    {% endfor %}
+                </select>
+                {% endif %}
+                <a href="/results/run_audit/" class="btn btn-run">Run Audit</a>
+            </div>
         </div>
 
         <!-- Stat Cards -->
@@ -40,7 +55,6 @@
         </div>
 
         <div class="row mb-4">
-
             <!-- Chart -->
             <div class="col-md-5">
                 <div class="panel text-center">
@@ -77,48 +91,47 @@
                     </table>
                 </div>
             </div>
-
         </div>
     </div>
 
-<!-- Results Table -->
-<div class="panel results-panel">
-    <table class="table align-middle mb-0">
-        <thead>
-            <tr>
-                <th>Sender</th>
-                <th>Channel</th>
-                <th>Risk Score</th>
-                <th>Level</th>
-                <th>Method</th>
-            </tr>
-        </thead>
-        <tbody>
-        {% for result in results %}
-            <tr>
-                <td class="fw-500">{{ result.message.sender_name }}</td>
-                <td class="text-muted">{{ result.message.channel }}</td>
-                <td class="fw-600">{{ result.risk_score|floatformat:2 }}</td>
-                <td>
-                    {% if result.risk_level == "critical" %}
-                        <span class="risk-badge risk-critical">Critical</span>
-                    {% elif result.risk_level == "high" %}
-                        <span class="risk-badge risk-high">High</span>
-                    {% elif result.risk_level == "medium" %}
-                        <span class="risk-badge risk-medium">Medium</span>
-                    {% else %}
-                        <span class="risk-badge risk-low">Low</span>
-                    {% endif %}
-                </td>
-                <td class="method-label">{{ result.method }}</td>
-            </tr>
-        {% empty %}
-            <tr>
-                <td colspan="5" class="text-center text-muted py-4">No audit results yet.</td>
-            </tr>
-        {% endfor %}
-        </tbody>
-    </table>
-</div>
+    <!-- Results Table -->
+    <div class="panel results-panel">
+        <table class="table align-middle mb-0">
+            <thead>
+                <tr>
+                    <th>Sender</th>
+                    <th>Channel</th>
+                    <th>Risk Score</th>
+                    <th>Level</th>
+                    <th>Method</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for result in results %}
+                <tr>
+                    <td class="fw-500">{{ result.message.sender_name }}</td>
+                    <td class="text-muted">{{ result.message.channel }}</td>
+                    <td class="fw-600">{{ result.risk_score|floatformat:2 }}</td>
+                    <td>
+                        {% if result.risk_level == "critical" %}
+                            <span class="risk-badge risk-critical">Critical</span>
+                        {% elif result.risk_level == "high" %}
+                            <span class="risk-badge risk-high">High</span>
+                        {% elif result.risk_level == "medium" %}
+                            <span class="risk-badge risk-medium">Medium</span>
+                        {% else %}
+                            <span class="risk-badge risk-low">Low</span>
+                        {% endif %}
+                    </td>
+                    <td class="method-label">{{ result.method }}</td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="5" class="text-center text-muted py-4">No audit results yet.</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
 </div>
 {% endblock %}

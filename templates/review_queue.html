@@ -12,9 +12,21 @@
             <span class="queue-count">{{ queue|length }} flagged</span>
         </div>
 
+        <!-- Toggle -->
+        <div class="d-flex gap-2 px-3 py-2">
+            <a href="/review/?show=pending{% if current_session %}&session={{ current_session.id }}{% endif %}"
+               class="btn btn-sm {% if show == 'pending' %}btn-primary{% else %}btn-outline-secondary{% endif %}">
+                Pending
+            </a>
+            <a href="/review/?show=reviewed{% if current_session %}&session={{ current_session.id }}{% endif %}"
+               class="btn btn-sm {% if show == 'reviewed' %}btn-primary{% else %}btn-outline-secondary{% endif %}">
+                Reviewed
+            </a>
+        </div>
+
         <div class="review-list-scroll">
             {% for result in queue %}
-            <a href="/review/?selected={{ result.id }}"
+            <a href="/review/?selected={{ result.id }}&show={{ show }}{% if current_session %}&session={{ current_session.id }}{% endif %}"
                class="review-item {% if selected and selected.message.id == result.message.id %}review-item-active{% endif %}">
                 <div class="review-item-top">
                     <span class="fw-600">{{ result.message.sender_name }}</span>
@@ -38,7 +50,7 @@
                 </div>
             </a>
             {% empty %}
-                <p class="text-muted p-3">No flagged messages in queue.</p>
+                <p class="text-muted p-3">No messages in this view.</p>
             {% endfor %}
         </div>
     </div>
@@ -46,7 +58,6 @@
     <!-- RIGHT PANEL -->
     <div class="review-detail">
         {% if selected %}
-
             <!-- Message Info -->
             <div class="detail-header">
                 <div>

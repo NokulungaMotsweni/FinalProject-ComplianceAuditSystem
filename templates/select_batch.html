@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+{% block title %}Select Dataset{% endblock %}
+
+{% block content %}
+<div class="page-header mb-4">
+    <h1 class="page-title">Select Dataset to Audit</h1>
+</div>
+
+<div class="panel">
+    <p class="panel-title">Available Uploads</p>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Filename</th>
+                <th>Records</th>
+                <th>Uploaded</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for batch in batches %}
+            <tr>
+                <td class="fw-500">{{ batch.filename }}</td>
+                <td>{{ batch.total_records }}</td>
+                <td class="text-muted">{{ batch.uploaded_at|date:"d M Y H:i" }}</td>
+                <td>
+                    <form method="POST" action="/results/run_audit/">
+                        {% csrf_token %}
+                        <input type="hidden" name="batch_id" value="{{ batch.id }}">
+                        <button type="submit" class="btn btn-run">Run Audit</button>
+                    </form>
+                </td>
+            </tr>
+        {% empty %}
+            <tr>
+                <td colspan="4" class="text-muted text-center py-4">No completed uploads found.</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

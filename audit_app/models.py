@@ -2,7 +2,29 @@ from django.db import models
 from django.conf import settings
 from .choices import (RiskLevel, DetectionMethod, ReviewStatus)
 
-# Create your models here.
+class AuditSession(models.Model):
+    batch = models.ForeignKey(
+        "messages_app.UploadBatch",
+        on_delete=models.CASCADE,
+        related_name="audit_sessions",
+        null=True,
+        blank=True
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True
+    )
+    duration_seconds = models.FloatField(null=True, blank=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return f"Audit Session {self.id} — {self.created_at.strftime('%Y-%m-%d %H:%M')}"
+
 
 class AuditResult(models.Model):
 
@@ -10,6 +32,14 @@ class AuditResult(models.Model):
         "messages_app.Message",
         on_delete=models.CASCADE,
         related_name='audit_results',
+    )
+
+    session = models.ForeignKey(
+        AuditSession,
+        on_delete=models.CASCADE,
+        related_name="results",
+        null=True,
+        blank=True
     )
 
     def apply_risk_logic(self):
@@ -85,12 +115,6 @@ class AuditResult(models.Model):
 
     class Meta:
         ordering = ["-created_at"]
-        constraints = [
-            models.UniqueConstraint(
-                fields=["message", "method"],
-                name="unique_message_method_result"
-            )
-        ]
 
     def __str__(self):
         return (
