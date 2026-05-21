@@ -19,7 +19,7 @@
         <div class="navbar-nav ms-auto">
             <a class="nav-link" href="/">Dashboard</a>
             <a class="nav-link" href="{% url 'upload_dataset' %}">Uploads</a>
-            <a class="nav-link" href="/results/select_batch/">Results</a>
+            <a class="nav-link" href="/results/">Results</a>
             <a class="nav-link" href="{% url 'review_queue' %}">Review Queue</a>
             <a class="nav-link" href="{% url 'evaluation' %}">Evaluation</a>
 
@@ -27,7 +27,7 @@
     </div>
 </nav>
 
-<div class="container py-4">
+<div class="container-fluid py-4 py-4">
      {% if messages %}
       {% for message in messages %}
         <div class="alert alert-{{ message.tags }} mb-3">

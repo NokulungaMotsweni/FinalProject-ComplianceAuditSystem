@@ -328,7 +328,10 @@ body {
 
 /* ── Layout ── */
 .container {
-    max-width: 1400px;
+    max-width: 1400px !important;
+    width: 100%;
+    padding-left: 2rem;
+    padding-right: 2rem;
 }
 
 .page-layout {

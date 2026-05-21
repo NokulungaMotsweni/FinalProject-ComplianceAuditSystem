@@ -222,7 +222,7 @@ def review_queue(request):
         if selected:
             all_method_results = (
                 AuditResult.objects
-                .filter(message=selected.message)
+                .filter(message=selected.message, session=session)
                 .order_by("method")
             )
 

@@ -54,12 +54,13 @@
             </div>
         </div>
 
-        <div class="row mb-4">
+        <div class="row mb-4 align-items-stretch">
             <!-- Chart -->
-            <div class="col-md-5">
-                <div class="panel text-center">
-                    <p class="panel-title">Risk Distribution</p>
-                    <div class="chart-wrapper">
+            <div class="col-md-4">
+                <div class="panel h-100 d-flex flex-column">
+                    <p class="panel-title w-100">Risk Distribution</p>
+                    <div class="d-flex align-items-center justify-content-center flex-grow-1">
+                    <div style="width: 250px; height: 250px; position: relative;">
                         <canvas id="riskChart"
                             data-critical="{{ critical_count }}"
                             data-high="{{ high_count }}"
@@ -68,10 +69,11 @@
                     </div>
                 </div>
             </div>
+            </div>
 
             <!-- Top Senders -->
-            <div class="col-md-7 senders-col">
-                <div class="panel senders-panel h-100">
+            <div class="col-md-8">
+                <div class="panel h-100">
                     <p class="panel-title">Top Senders by Flags</p>
                     <table class="table mb-0">
                         <thead>
@@ -92,7 +94,6 @@
                 </div>
             </div>
         </div>
-    </div>
 
     <!-- Results Table -->
     <div class="panel results-panel">
@@ -133,5 +134,6 @@
             </tbody>
         </table>
     </div>
+</div>
 </div>
 {% endblock %}
