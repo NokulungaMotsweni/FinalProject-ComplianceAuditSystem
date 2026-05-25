@@ -24,9 +24,34 @@ document.addEventListener("DOMContentLoaded", function () {
                 responsive: true,
                 maintainAspectRatio: false,
                 cutout: "65%",
+                layout: {
+                    padding: {
+                        bottom: 10
+                    }
+                },
                 plugins: {
                     legend: {
-                        position: "bottom"
+                        position: "bottom",
+                        labels: {
+                            boxWidth: 12,
+                            padding: 20,
+                            font: {
+                                size: 20
+                            }
+                        },
+                        paddingTop: 60
+                    },
+                    tooltip: {
+                        position: "nearest",
+                        callbacks: {
+                            label: function (context) {
+                                return " " + context.label + ": " + context.parsed;
+                            }
+                        },
+                        bodyFont: {
+                            size: 15
+                        },
+                        padding: 10
                     }
                 }
             }
@@ -58,7 +83,7 @@ document.addEventListener("DOMContentLoaded", function () {
             }
         });
     }
-    
+
     // Evaluation row click
     const evalRows = document.querySelectorAll('.eval-row');
     if (evalRows.length > 0) {

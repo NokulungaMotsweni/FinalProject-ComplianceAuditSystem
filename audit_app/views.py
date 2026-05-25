@@ -125,15 +125,19 @@ def run_audit(request):
     return redirect("results")
 
 def results_list(request):
-    # Get all sessions for the sidebar
     sessions = AuditSession.objects.all().order_by("-created_at")
 
-    # Get selected session — default to latest
     session_id = request.GET.get("session")
     if session_id:
         session = get_object_or_404(AuditSession, id=session_id)
     else:
         session = sessions.first()
+
+    # Get filter parameters
+    filter_risk    = request.GET.get("risk_level", "")
+    filter_sender  = request.GET.get("sender", "")
+    filter_channel = request.GET.get("channel", "")
+    filter_method  = request.GET.get("method", "")
 
     if session:
         results = (
@@ -143,6 +147,16 @@ def results_list(request):
             .order_by("-created_at")
         )
 
+        # Apply filters
+        if filter_risk:
+            results = results.filter(risk_level=filter_risk)
+        if filter_sender:
+            results = results.filter(message__sender_name=filter_sender)
+        if filter_channel:
+            results = results.filter(message__channel=filter_channel)
+        if filter_method:
+            results = results.filter(method=filter_method)
+
         top_senders = (
             AuditResult.objects
             .select_related("message")
@@ -151,9 +165,29 @@ def results_list(request):
             .annotate(flag_count=Count("id"))
             .order_by("-flag_count")[:5]
         )
+
+        # Get unique values for filter dropdowns
+        all_senders = (
+            AuditResult.objects
+            .filter(flagged=True, session=session)
+            .values_list("message__sender_name", flat=True)
+            .distinct()
+            .order_by("message__sender_name")
+        )
+
+        all_channels = (
+            AuditResult.objects
+            .filter(flagged=True, session=session)
+            .values_list("message__channel", flat=True)
+            .distinct()
+            .order_by("message__channel")
+        )
+
     else:
         results = AuditResult.objects.none()
         top_senders = []
+        all_senders = []
+        all_channels = []
 
     context = {
         "results": results,
@@ -164,6 +198,12 @@ def results_list(request):
         "critical_count": results.filter(risk_level="critical").count(),
         "high_count": results.filter(risk_level="high").count(),
         "top_senders": top_senders,
+        "all_senders": all_senders,
+        "all_channels": all_channels,
+        "filter_risk": filter_risk,
+        "filter_sender": filter_sender,
+        "filter_channel": filter_channel,
+        "filter_method": filter_method,
     }
 
     return render(request, "results.html", context)

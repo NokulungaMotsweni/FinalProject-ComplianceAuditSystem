@@ -9,6 +9,7 @@
         <div class="page-header mb-4">
             <h1 class="page-title">Audit Results</h1>
             <div class="d-flex gap-2 align-items-center">
+
                 <!-- Session selector -->
                 {% if sessions %}
                 <select class="form-select form-select-sm w-auto"
@@ -60,7 +61,7 @@
                 <div class="panel h-100 d-flex flex-column">
                     <p class="panel-title w-100">Risk Distribution</p>
                     <div class="d-flex align-items-center justify-content-center flex-grow-1">
-                    <div style="width: 250px; height: 250px; position: relative;">
+                    <div style="width: 300px; height:300px; position: relative;">
                         <canvas id="riskChart"
                             data-critical="{{ critical_count }}"
                             data-high="{{ high_count }}"
@@ -93,6 +94,53 @@
                     </table>
                 </div>
             </div>
+        </div>
+
+            <!-- Filters -->
+        <div class="panel mb-4 py-2">
+            <form method="GET" action="/results/" class="d-flex gap-2 align-items-center flex-wrap">
+                {% if current_session %}
+                    <input type="hidden" name="session" value="{{ current_session.id }}">
+                {% endif %}
+
+                <select name="risk_level" class="form-select form-select-sm w-auto">
+                    <option value="">All Risk Levels</option>
+                    <option value="critical" {% if filter_risk == "critical" %}selected{% endif %}>Critical</option>
+                    <option value="high" {% if filter_risk == "high" %}selected{% endif %}>High</option>
+                    <option value="medium" {% if filter_risk == "medium" %}selected{% endif %}>Medium</option>
+                </select>
+
+                <select name="sender" class="form-select form-select-sm w-auto">
+                    <option value="">All Senders</option>
+                    {% for sender in all_senders %}
+                        <option value="{{ sender }}" {% if filter_sender == sender %}selected{% endif %}>{{ sender }}</option>
+                    {% endfor %}
+                </select>
+
+                <select name="channel" class="form-select form-select-sm w-auto">
+                    <option value="">All Channels</option>
+                    {% for channel in all_channels %}
+                        <option value="{{ channel }}" {% if filter_channel == channel %}selected{% endif %}>{{ channel }}</option>
+                    {% endfor %}
+                </select>
+
+                <select name="method" class="form-select form-select-sm w-auto">
+                    <option value="">All Methods</option>
+                    <option value="hybrid" {% if filter_method == "hybrid" %}selected{% endif %}>Hybrid</option>
+                    <option value="rule_based" {% if filter_method == "rule_based" %}selected{% endif %}>Rule Based</option>
+                    <option value="tfidf" {% if filter_method == "tfidf" %}selected{% endif %}>TF-IDF</option>
+                </select>
+
+                <button type="submit" class="btn btn-run btn-sm">
+                    <i class="bi bi-funnel me-1"></i>Filter
+                </button>
+
+                {% if filter_risk or filter_sender or filter_channel or filter_method %}
+                    <a href="/results/?session={{ current_session.id }}" class="btn btn-dismiss btn-sm">
+                        <i class="bi bi-x me-1"></i>Clear
+                    </a>
+                {% endif %}
+            </form>
         </div>
 
     <!-- Results Table -->
