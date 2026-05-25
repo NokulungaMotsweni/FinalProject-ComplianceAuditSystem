@@ -81,14 +81,14 @@ def upload_dataset(request):
         if failed == 0:
             messages.success(
                 request,
-                f"Upload successful: {success} records processed."
+                f"Upload successful: {success} records processed. Run the audit to analyse your dataset."
             )
+            return redirect("results")
         else:
             messages.warning(
                 request,
                 f"Upload completed with errors: {success} succeeded, {failed} failed."
             )
-
-        return redirect("upload_dataset")
-
+            return redirect("upload_dataset")
+        
     return render(request, "upload.html")

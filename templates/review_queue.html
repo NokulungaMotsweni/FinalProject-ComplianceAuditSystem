@@ -49,21 +49,14 @@
 
             <!-- Close Session Button -->
             {% if current_session and not current_session.is_closed %}
-                <form method="POST" action="/review/{{ current_session.id }}/close/" class="mt-3">
-                    {% csrf_token %}
-                    <button type="submit"
-                            {% if pending_count > 0 %}disabled{% endif %}
-                            class="btn btn-run w-100 {% if pending_count > 0 %}opacity-50{% endif %}">
-                        {% if pending_count == 0 %}
-                            <form method="POST" action="/review/{{ current_session.id }}/close/" class="mt-3">
-                                {% csrf_token %}
-                                <button type="submit" class="btn btn-run w-100">
-                                    Close Session
-                                </button>
-                            </form>
-                        {% endif %}
-                    </button>
-                </form>
+                {% if pending_count == 0 %}
+                    <form method="POST" action="/review/{{ current_session.id }}/close/" class="mt-3">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-run w-100">
+                            <i class="bi bi-lock me-1"></i>Close Session
+                        </button>
+                    </form>
+                {% endif %}
             {% elif current_session.is_closed %}
                 <div class="mt-3 text-center" style="font-size: 0.78rem; color: #16a34a; font-weight: 600;">
                     ✓ Session closed {{ current_session.closed_at|date:"d M Y H:i" }}
@@ -153,18 +146,18 @@
             <div class="review-actions">
                 <form method="POST" action="/review/{{ selected.id }}/action/">
                     {% csrf_token %}
-                    <textarea
+                  <textarea
                         name="notes"
                         class="review-notes"
                         placeholder="Add review notes (optional)..."></textarea>
                     <div class="action-buttons">
                         <button type="submit" name="decision"
                                 value="reviewed" class="btn btn-confirm">
-                            Confirm Risk
+                            <i class="bi bi-flag me-1"></i>Confirm Risk
                         </button>
                         <button type="submit" name="decision"
                                 value="dismissed" class="btn btn-dismiss">
-                            Dismiss
+                            <i class="bi bi-x-circle me-1"></i>Dismiss
                         </button>
                     </div>
                 </form>

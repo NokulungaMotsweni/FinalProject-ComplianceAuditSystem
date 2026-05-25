@@ -1,0 +1,24 @@
+2026-05-25 — Fix review queue — Filter results by session to prevent cross-session duplicates 2026-05-25 - Fix review action — bulk update all method results on review to clear pending status 
+2026-05-25 -Add close session feature — is_closed and closed_at fields to AuditSession model 
+2026-05-25 - Add close_session view and URL Add session progress donut chart to review queue left panel 
+2026-05-25 - Add reviewed messages notification on review action 
+2026-05-25 - Fix run_audit — move delete() outside if/else to prevent duplicate results on re-run 
+2026-05-25 - Increase font sizes across interface and improve nav link contrast
+2026-05-22 — Audit session history, UI improvements and bug fixes
+2026-05-21 — add AuditSession model for audit history and review queue toggle
+2026-05-12 — Changes to the styling of the FE.
+2026-05-05 — Made changes to the dashboard, created the uploads functionality, and UI beautification.
+2026-05-04 — Fixed hybrid v2 implementation by changing the tfidf_weight from 0.3 to 1.0.
+2026-05-04 —  Combine rule-based and TF-IDF scores (70/30 weighting) - Add corroboration bonus - Store hybrid results in pipeline
+2026-05-03 — Implemented TF-IDF detection pipeline, fixed risk scoring consistency, added execution time tracking, and formatted risk score output
+2026-05-02 — feat: implement rule-based audit system v2 with improved detection and processing pipeline
+2026-05-02 — feat: add frontend for dashboard and audit results UI.
+2026-04-27 — cleaned uo the AuditResults save function.
+2026-04-27 — Moved MessageCategory from audit_app to messages_app to show clean ownership of the class.
+2026-04-27 — Removed duplication in import_messages.py of def handle().
+2026-04-27 — Add admin improvements and enhance CSV import with batch tracking.
+2026-04-27 — Add config files, update models and improve CSV import with error handling.
+2026-04-25 — Implement CSV dataset import commands for Message records, add comments to uncommented and new code.
+2026-04-21 — Refine Message model and register admin models, fix spelling of comments.
+2026-04-20 — Revised project structure and message model.
+2026-04-03 — Initial commit.

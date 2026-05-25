@@ -6,15 +6,70 @@
 
 <h1 class="mb-4 fw-bold">Upload Dataset</h1>
 
-<div class="card shadow-sm p-3 text-center h-100">
-    <form method="POST" enctype="multipart/form-data">
-        {% csrf_token %}
-        <div class="mb-3">
-            <label for="file" class="form-label">Select CSV File</label>
-            <input type="file" class="form-control" id="file" name="file" accept=".csv">
+<div class="row g-4 align-items-stretch">
+<div class="col-md-6">
+    <div class="panel h-100">
+        <p class="panel-title">How It Works</p>
+        <div class="mb-4">
+            <div class="d-flex gap-3 mb-3">
+                <span style="font-family: 'IBM Plex Mono', monospace; font-weight: 600; color: #0f1117; font-size: 1.2rem;">01</span>
+                <div>
+                    <div class="fw-500">Select your CSV file</div>
+                    <div class="text-muted" style="font-size: 0.875rem;">Choose a dataset conforming to the expected schema shown on the right.</div>
+                </div>
+            </div>
+            <div class="d-flex gap-3 mb-3">
+                <span style="font-family: 'IBM Plex Mono', monospace; font-weight: 600; color: #0f1117; font-size: 1.2rem;">02</span>
+                <div>
+                    <div class="fw-500">Upload the dataset</div>
+                    <div class="text-muted" style="font-size: 0.875rem;">Records are validated and stored. Any malformed rows are logged without stopping the import.</div>
+                </div>
+            </div>
+            <div class="d-flex gap-3 mb-4">
+                <span style="font-family: 'IBM Plex Mono', monospace; font-weight: 600; color: #0f1117; font-size: 1.2rem;">03</span>
+                <div>
+                    <div class="fw-500">Run the audit</div>
+                    <div class="text-muted" style="font-size: 0.875rem;">Navigate to Results and click Run Audit to begin detection and analysis.</div>
+                </div>
+            </div>
         </div>
-        <button type="submit" class="btn btn-primary">Upload</button>
-    </form>
+        <form method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="mb-3">
+                <label for="file" class="form-label fw-500">Select CSV File</label>
+                <input type="file" class="form-control" id="file" name="file" accept=".csv">
+            </div>
+            <button type="submit" class="btn btn-run">
+                <i class="bi bi-upload me-1"></i>Upload
+            </button>
+        </form>
+    </div>
+</div>
+
+    <div class="col-md-6 align-items-stretch">
+        <div class="panel h-100 ">
+            <p class="panel-title">Expected CSV Format</p>
+            <p class="text-muted mb-3" style="font-size: 0.95rem;">The uploaded file must contain the following columns:</p>
+            <table class="table mb-0">
+                <thead>
+                    <tr>
+                        <th>Column</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td class="method-label">message_id</td><td class="text-muted">Unique message identifier</td></tr>
+                    <tr><td class="method-label">timestamp</td><td class="text-muted">Message timestamp (YYYY-MM-DD HH:MM:SS)</td></tr>
+                    <tr><td class="method-label">channel</td><td class="text-muted">Communication channel</td></tr>
+                    <tr><td class="method-label">sender_id</td><td class="text-muted">Sender identifier</td></tr>
+                    <tr><td class="method-label">sender_name</td><td class="text-muted">Sender display name</td></tr>
+                    <tr><td class="method-label">sender_role</td><td class="text-muted">Sender job role</td></tr>
+                    <tr><td class="method-label">message</td><td class="text-muted">Message content</td></tr>
+                    <tr><td class="method-label">category</td><td class="text-muted">Message category label</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
 </div>
 
 {% endblock %}
