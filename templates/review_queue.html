@@ -24,6 +24,53 @@
             </a>
         </div>
 
+        <!-- Session Progress Donut -->
+        <div class="session-progress px-3 py-3">
+            <div class="d-flex align-items-center gap-3">
+                <div style="position: relative; width: 80px; height: 80px; flex-shrink: 0;">
+                    <canvas id="progressDonut"
+                        data-pending="{{ pending_count }}"
+                        data-total="{{ total_flagged }}">
+                    </canvas>
+                    <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+                                font-family: 'IBM Plex Mono', monospace; font-weight: 600; font-size: 1.1rem;
+                                color: {% if pending_count == 0 %}#16a34a{% else %}#e53e3e{% endif %};">
+                        {{ pending_count }}
+                    </div>
+                </div>
+                <div>
+                    <div style="font-size: 0.78rem; font-weight: 600; text-transform: uppercase;
+                                letter-spacing: 0.8px; color: #64748b;">Progress</div>
+                    <div style="font-size: 0.85rem; color: #1a1d23;">
+                        {{ reviewed_count }} of {{ total_flagged }} reviewed
+                    </div>
+                </div>
+            </div>
+
+            <!-- Close Session Button -->
+            {% if current_session and not current_session.is_closed %}
+                <form method="POST" action="/review/{{ current_session.id }}/close/" class="mt-3">
+                    {% csrf_token %}
+                    <button type="submit"
+                            {% if pending_count > 0 %}disabled{% endif %}
+                            class="btn btn-run w-100 {% if pending_count > 0 %}opacity-50{% endif %}">
+                        {% if pending_count == 0 %}
+                            <form method="POST" action="/review/{{ current_session.id }}/close/" class="mt-3">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-run w-100">
+                                    Close Session
+                                </button>
+                            </form>
+                        {% endif %}
+                    </button>
+                </form>
+            {% elif current_session.is_closed %}
+                <div class="mt-3 text-center" style="font-size: 0.78rem; color: #16a34a; font-weight: 600;">
+                    ✓ Session closed {{ current_session.closed_at|date:"d M Y H:i" }}
+                </div>
+            {% endif %}
+        </div>
+
         <div class="review-list-scroll">
             {% for result in queue %}
             <a href="/review/?selected={{ result.id }}&show={{ show }}{% if current_session %}&session={{ current_session.id }}{% endif %}"

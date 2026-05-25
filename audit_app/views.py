@@ -2,12 +2,13 @@ from django.shortcuts import render, redirect, get_object_or_404
 from messages_app.models import Message
 from .evaluate import run_full_evaluation
 from .models import AuditResult, AuditSession
-from audit_app.choices import DetectionMethod
+from audit_app.choices import DetectionMethod, ReviewStatus
 from audit_app.services.rule_engine import RuleBasedDetector
 from .services.tfidf_service import TFIDFDetector
 from audit_app.services.hybrid import hybrid_score
 from django.db.models import Count, Case, When, IntegerField
 from django.utils import timezone
+from django.contrib import messages
 import time
 
 
@@ -30,10 +31,11 @@ def run_audit(request):
 
     if batch_id:
         messages = list(Message.objects.filter(batch_id=batch_id))
-        # Clear existing audit results for this batch's messages only
-        AuditResult.objects.filter(message__in=messages)
     else:
         messages = list(Message.objects.all())
+
+    # Always clear old results before running
+    AuditResult.objects.filter(message__in=messages).delete()
 
     # Create a new session for this run
     session = AuditSession.objects.create(
@@ -181,7 +183,7 @@ def review_queue(request):
     # Get all flagged results, preferring hybrid where it exists
     all_flagged = (
         AuditResult.objects
-        .filter(flagged=True)
+        .filter(flagged=True, session=session)
         .select_related("message")
         .annotate(
             method_priority=Case(
@@ -226,6 +228,19 @@ def review_queue(request):
                 .order_by("method")
             )
 
+    total_flagged = AuditResult.objects.filter(
+        session=session,
+        flagged=True
+    ).values("message_id").distinct().count()
+
+    pending_count = AuditResult.objects.filter(
+        session=session,
+        flagged=True,
+        review_status=ReviewStatus.PENDING
+    ).values("message_id").distinct().count()
+
+    reviewed_count = total_flagged - pending_count
+
     context = {
         "queue": queue,
         "selected": selected,
@@ -233,7 +248,11 @@ def review_queue(request):
         "sessions": sessions,
         "current_session": session,
         "show": show,
+        "pending_count": pending_count,
+        "total_flagged": total_flagged,
+        "reviewed_count": reviewed_count,
     }
+
     return render(request, "review_queue.html", context)
 
 
@@ -250,10 +269,46 @@ def review_action(request, result_id):
 
         if request.user.is_authenticated:
             result.reviewed_by = request.user
+        else:
+            result.reviewed_at = None
 
         result.save()
 
+        if decision == "reviewed":
+            messages.success(request, f"Message from {result.message.sender_name} marked as confirmed risk.")
+        elif decision == "dismissed":
+            messages.info(request, f"Message from {result.message.sender_name} dismissed.")
+
+        AuditResult.objects.filter(
+            message=result.message,
+            session=result.session
+        ).exclude(id=result_id).update(
+            review_status=decision,
+            reviewed_at=timezone.now()
+        )
     return redirect(f"/review/?selected={result_id}")
+
+def close_session(request, session_id):
+    if request.method == "POST":
+        session = get_object_or_404(AuditSession, id=session_id)
+
+        # Double check no pending results remain
+        pending = AuditResult.objects.filter(
+            session=session,
+            flagged=True,
+            review_status=ReviewStatus.PENDING).exists()
+
+        if not pending:
+            session.is_closed = True
+            session.closed_at = timezone.now()
+            if request.user.is_authenticated:
+                session.closed_by = request.user
+            session.save()
+            messages.success(request, "Session closed successfully.")
+        else:
+            messages.warning(request, "Cannot close session — pending reviews remain.")
+
+    return redirect(f"/review/?session={session.id}")
 
 def evaluation_view(request):
     results = run_full_evaluation()

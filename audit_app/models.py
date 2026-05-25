@@ -18,6 +18,9 @@ class AuditSession(models.Model):
         blank=True
     )
     duration_seconds = models.FloatField(null=True, blank=True)
+    is_closed = models.BooleanField(default=False)
+    closed_at = models.DateTimeField(null=True, blank=True)
+
 
     class Meta:
         ordering = ["-created_at"]

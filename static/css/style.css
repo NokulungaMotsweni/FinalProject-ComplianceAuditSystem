@@ -7,7 +7,7 @@ body {
     background-color: #f0f2f5;
     font-family: 'IBM Plex Sans', sans-serif;
     color: #1a1d23;
-    font-size: 0.925rem;
+    font-size: 1rem;
 }
 
 /* ── Navbar ── */
@@ -26,8 +26,8 @@ body {
 }
 
 .nav-link {
-    color: #8892a4 !important;
-    font-size: 0.85rem;
+    color: #b0bac9 !important;
+    font-size: 0.95rem;
     font-weight: 500;
     letter-spacing: 0.3px;
     padding: 0.5rem 1rem !important;
@@ -125,7 +125,7 @@ body {
 .stat-card.stat-medium   { border-left-color: #0284c7; }
 
 .stat-label {
-    font-size: 0.72rem;
+    font-size: 0.78rem;
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.8px;
@@ -154,7 +154,7 @@ body {
 }
 
 .panel-title {
-    font-size: 0.72rem;
+    font-size: 0.78rem;
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.8px;
@@ -164,7 +164,7 @@ body {
 
 /* ── Table ── */
 .table thead th {
-    font-size: 0.72rem;
+    font-size: 0.78rem;
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.7px;
@@ -178,7 +178,7 @@ body {
     padding: 0.85rem 0.75rem;
     border-bottom: 1px solid #f1f5f9;
     color: #1a1d23;
-    font-size: 0.9rem;
+    font-size: 0.95rem;
     overflow: hidden;
 }
 
@@ -203,7 +203,7 @@ body {
 /* ── Risk Badges ── */
 .risk-badge {
     display: inline-block;
-    font-size: 0.72rem;
+    font-size: 0.75rem;
     font-weight: 600;
     letter-spacing: 0.5px;
     text-transform: uppercase;
@@ -238,7 +238,7 @@ body {
 /* ── Status Badges ── */
 .status-badge {
     display: inline-block;
-    font-size: 0.68rem;
+    font-size: 0.75rem;
     font-weight: 600;
     letter-spacing: 0.5px;
     text-transform: uppercase;
@@ -280,7 +280,7 @@ body {
 }
 
 .card h6 {
-    font-size: 0.72rem;
+    font-size: 0.78rem;
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.8px;
@@ -406,7 +406,7 @@ body {
 }
 
 .queue-count {
-    font-size: 0.72rem;
+    font-size: 0.78rem;
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.8px;

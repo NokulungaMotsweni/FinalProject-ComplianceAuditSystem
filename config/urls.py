@@ -27,4 +27,5 @@ urlpatterns = [
     path('review/', audit_views.review_queue, name='review_queue'),
     path('review/<int:result_id>/action/', audit_views.review_action, name='review_action'),
     path('evaluation/', audit_views.evaluation_view, name='evaluation'),
+path('review/<int:session_id>/close/', audit_views.close_session, name='close_session'),
 ]

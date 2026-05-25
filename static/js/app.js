@@ -33,6 +33,32 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 
+    // Progress Donut
+    const progressCanvas = document.getElementById("progressDonut");
+    if (progressCanvas) {
+        const pending = parseInt(progressCanvas.dataset.pending);
+        const total = parseInt(progressCanvas.dataset.total);
+        const reviewed = total - pending;
+
+        new Chart(progressCanvas, {
+            type: "doughnut",
+            data: {
+                datasets: [{
+                    data: pending === 0 ? [total, 0] : [reviewed, pending],
+                    backgroundColor: pending === 0
+                        ? ["#16a34a", "#f0fdf4"]
+                        : ["#e2e8f0", "#e53e3e"],
+                    borderWidth: 0,
+                }]
+            },
+            options: {
+                cutout: "72%",
+                plugins: { legend: { display: false }, tooltip: { enabled: false } },
+                animation: { duration: 600 }
+            }
+        });
+    }
+    
     // Evaluation row click
     const evalRows = document.querySelectorAll('.eval-row');
     if (evalRows.length > 0) {
