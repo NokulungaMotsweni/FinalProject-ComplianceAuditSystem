@@ -10,8 +10,9 @@ from messages_app.choices import UploadStatus
 from django.contrib import messages
 from django.utils import timezone
 from datetime import datetime
+from django.contrib.auth.decorators import login_required
 
-
+@login_required
 def dashboard(request):
     total_messages = Message.objects.count()
     total_uploads = UploadBatch.objects.count()
@@ -32,6 +33,7 @@ def dashboard(request):
 
     return render(request, "dashboard.html", context)
 
+@login_required
 def upload_dataset(request):
     if request.method == "POST" and request.FILES.get("file"):
         file = request.FILES["file"]
@@ -90,5 +92,5 @@ def upload_dataset(request):
                 f"Upload completed with errors: {success} succeeded, {failed} failed."
             )
             return redirect("upload_dataset")
-        
+
     return render(request, "upload.html")

@@ -9,9 +9,10 @@ from audit_app.services.hybrid import hybrid_score
 from django.db.models import Count, Case, When, IntegerField
 from django.utils import timezone
 from django.contrib import messages
+from django.contrib.auth.decorators import login_required
 import time
 
-
+@login_required
 def select_batch(request):
     from messages_app.models import UploadBatch
     from messages_app.choices import UploadStatus
@@ -22,6 +23,7 @@ def select_batch(request):
 
     return render(request, "select_batch.html", {"batches": batches})
 
+@login_required
 def run_audit(request):
     start_time = time.time()
 
@@ -124,6 +126,7 @@ def run_audit(request):
 
     return redirect("results")
 
+@login_required
 def results_list(request):
     sessions = AuditSession.objects.all().order_by("-created_at")
 
@@ -208,6 +211,7 @@ def results_list(request):
 
     return render(request, "results.html", context)
 
+@login_required
 def review_queue(request):
     # Get session filter
     session_id = request.GET.get("session")
@@ -295,7 +299,7 @@ def review_queue(request):
 
     return render(request, "review_queue.html", context)
 
-
+@login_required
 def review_action(request, result_id):
     if request.method == "POST":
         result = AuditResult.objects.get(id=result_id)
@@ -328,6 +332,7 @@ def review_action(request, result_id):
         )
     return redirect(f"/review/?selected={result_id}")
 
+@login_required
 def close_session(request, session_id):
     if request.method == "POST":
         session = get_object_or_404(AuditSession, id=session_id)
@@ -350,6 +355,7 @@ def close_session(request, session_id):
 
     return redirect(f"/review/?session={session.id}")
 
+@login_required
 def evaluation_view(request):
     results = run_full_evaluation()
     return render(request, "evaluation.html", {"results": results})
