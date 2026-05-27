@@ -23,6 +23,11 @@
                     {% endfor %}
                 </select>
                 {% endif %}
+               {% if current_session %}
+               <a href="{% url 'export_session_pdf' current_session.id %}" class="btn btn-run">
+                    <i class="bi bi-file-earmark-pdf me-1"></i>Export PDF
+               </a>
+                {% endif %}
                 <a href="/results/run_audit/" class="btn btn-run">Run Audit</a>
             </div>
         </div>
@@ -157,7 +162,10 @@
             </thead>
             <tbody>
             {% for result in results %}
-                <tr>
+                <tr class="result-row"
+                    data-result-id="{{ result.id }}"
+                    data-session-id="{{ current_session.id }}">
+
                     <td class="fw-500">{{ result.message.sender_name }}</td>
                     <td class="text-muted">{{ result.message.channel }}</td>
                     <td class="fw-600">{{ result.risk_score|floatformat:2 }}</td>

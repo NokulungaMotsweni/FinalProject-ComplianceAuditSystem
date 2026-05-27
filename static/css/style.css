@@ -34,6 +34,13 @@ body {
     transition: color 0.2s;
 }
 
+.nav-link.active {
+    background-color: #028090 !important;
+    color: white !important;
+    border-bottom: 3px solid #02c39a !important;
+    border-radius: 6px;
+}
+
 .nav-link:hover {
     color: #e2e8f0 !important;
 }

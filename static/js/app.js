@@ -84,6 +84,28 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 
+   // Active nav tab highlighting
+    const path = window.location.pathname;
+    document.querySelectorAll('.nav-link').forEach(link => {
+        const href = link.getAttribute('href');
+        if (!href) return;
+        if (href === '/' && path === '/') {
+            link.classList.add('active');
+        } else if (href !== '/' && path.startsWith(href)) {
+            link.classList.add('active');
+        }
+    });
+
+ // Clickable result rows -> review queue (event delegation)
+    document.addEventListener('click', function(e) {
+        const row = e.target.closest('.result-row');
+        if (row) {
+            const resultId = row.dataset.resultId;
+            const sessionId = row.dataset.sessionId;
+            window.location = '/review/?selected=' + resultId + '&session=' + sessionId;
+        }
+    });
+
     // Evaluation row click
     const evalRows = document.querySelectorAll('.eval-row');
     if (evalRows.length > 0) {
