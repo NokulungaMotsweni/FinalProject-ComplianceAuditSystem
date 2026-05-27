@@ -129,4 +129,15 @@ document.addEventListener("DOMContentLoaded", function () {
             });
         });
     }
+
+   // Export toast
+    window.showExportToast = function() {
+        const toast = document.createElement('div');
+        toast.className = 'alert alert-success';
+        toast.style.cssText = 'position:fixed; top:80px; right:20px; z-index:9999; min-width:250px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);';
+        toast.innerHTML = '<i class="bi bi-check-circle me-2"></i>Audit report exported successfully.';
+        document.body.appendChild(toast);
+        setTimeout(() => toast.remove(), 3500);
+    }
+    
 });

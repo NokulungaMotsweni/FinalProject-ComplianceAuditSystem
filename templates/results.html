@@ -24,7 +24,8 @@
                 </select>
                 {% endif %}
                {% if current_session %}
-               <a href="{% url 'export_session_pdf' current_session.id %}" class="btn btn-run">
+               <a href="{% url 'export_session_pdf' current_session.id %}"
+                  class="btn btn-run"  onclick="setTimeout(() => showExportToast(), 500)">
                     <i class="bi bi-file-earmark-pdf me-1"></i>Export PDF
                </a>
                 {% endif %}
