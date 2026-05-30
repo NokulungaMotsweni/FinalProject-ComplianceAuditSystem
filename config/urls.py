@@ -18,7 +18,7 @@ from xml.etree.ElementInclude import include
 
 from django.contrib import admin
 from django.urls import path, include
-from audit_app import views as audit_views
+from audit_app import views as audit_views, exports
 
 from django.contrib.auth import views as auth_views
 
@@ -32,5 +32,5 @@ urlpatterns = [
     path('review/<int:result_id>/action/', audit_views.review_action, name='review_action'),
     path('review/<int:session_id>/close/', audit_views.close_session, name='close_session'),
     path('evaluation/', audit_views.evaluation_view, name='evaluation'),
-    path('results/export/<int:session_id>/', audit_views.export_session_pdf, name='export_session_pdf'),
+    path('results/export/<int:session_id>/', exports.export_session_pdf, name='export_session_pdf'),
 ]

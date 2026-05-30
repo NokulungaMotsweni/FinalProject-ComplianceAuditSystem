@@ -1,3 +1,5 @@
+import time
+
 from django.shortcuts import render, redirect, get_object_or_404
 from messages_app.models import Message
 from .evaluate import run_full_evaluation
@@ -10,10 +12,7 @@ from django.db.models import Count, Case, When, IntegerField
 from django.utils import timezone
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.http import HttpResponse
-from reportlab.lib.pagesizes import A4
-from audit_app.exports import export_session_pdf
-import io
+import time
 
 @login_required
 def select_batch(request):

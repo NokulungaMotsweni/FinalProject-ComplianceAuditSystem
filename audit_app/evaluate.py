@@ -1,5 +1,6 @@
 from audit_app.models import AuditResult
 from audit_app.choices import DetectionMethod
+import time
 
 def evaluate(method):
     tp = fp = fn = tn = 0
